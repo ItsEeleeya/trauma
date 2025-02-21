@@ -121,7 +121,7 @@ impl Downloader {
     }
 
     /// Fetches the files and write them to disk.
-    async fn fetch(
+    pub async fn fetch(
         &self,
         client: &ClientWithMiddleware,
         download: &Download,
