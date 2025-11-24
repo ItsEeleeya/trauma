@@ -90,9 +90,9 @@ impl TryFrom<&Url> for Download {
         value
             .path_segments()
             .ok_or_else(|| {
-                Error::InvalidUrl(crate::InvalidUrlError::InvalidPath(value.to_string()))
+                Error::InvalidUrl(format!("the url \"{value}\" does not contain a valid path"))
             })?
-            .last()
+            .next_back()
             .map(String::from)
             .map(|filename| Download {
                 url: value.clone(),
@@ -100,7 +100,9 @@ impl TryFrom<&Url> for Download {
                     .map(|(key, val)| [key, val].concat())
                     .collect(),
             })
-            .ok_or_else(|| Error::InvalidUrl(crate::InvalidUrlError::NoFileName(value.to_string())))
+            .ok_or_else(|| {
+                Error::InvalidUrl(format!("the url \"{value}\" does not contain a filename"))
+            })
     }
 }
 
@@ -109,7 +111,7 @@ impl TryFrom<&str> for Download {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         Url::parse(value)
-            .map_err(|e| Error::InvalidUrl(crate::InvalidUrlError::ParseError { source: e }))
+            .map_err(|e| Error::InvalidUrl(format!("the url \"{value}\" cannot be parsed: {e}")))
             .and_then(|u| Download::try_from(&u))
     }
 }
@@ -175,7 +177,7 @@ impl Summary {
 
     pub fn fail(self, msg: impl std::fmt::Display) -> Self {
         Self {
-            status: Status::Fail(format!("{}", msg)),
+            status: Status::Fail(format!("{msg}")),
             ..self
         }
     }
