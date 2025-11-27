@@ -90,7 +90,7 @@ impl TryFrom<&Url> for Download {
         value
             .path_segments()
             .ok_or_else(|| {
-                Error::InvalidUrl(format!("the url \"{value}\" does not contain a valid path"))
+                Error::InvalidUrl(crate::InvalidUrlError::InvalidPath(value.to_string()))
             })?
             .next_back()
             .map(String::from)
@@ -100,9 +100,7 @@ impl TryFrom<&Url> for Download {
                     .map(|(key, val)| [key, val].concat())
                     .collect(),
             })
-            .ok_or_else(|| {
-                Error::InvalidUrl(format!("the url \"{value}\" does not contain a filename"))
-            })
+            .ok_or_else(|| Error::InvalidUrl(crate::InvalidUrlError::NoFileName(value.to_string())))
     }
 }
 
@@ -111,7 +109,7 @@ impl TryFrom<&str> for Download {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         Url::parse(value)
-            .map_err(|e| Error::InvalidUrl(format!("the url \"{value}\" cannot be parsed: {e}")))
+            .map_err(|e| Error::InvalidUrl(crate::InvalidUrlError::ParseError(e)))
             .and_then(|u| Download::try_from(&u))
     }
 }

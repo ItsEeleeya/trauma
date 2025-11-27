@@ -121,7 +121,7 @@ impl Downloader {
     }
 
     /// Fetches the files and write them to disk.
-    async fn fetch(
+    pub async fn fetch(
         &self,
         client: &ClientWithMiddleware,
         download: &Download,
@@ -178,7 +178,7 @@ impl Downloader {
         debug!("Fetching {}", &download.url);
         let mut req = client.get(download.url.clone());
         if self.resumable && can_resume {
-            req = req.header(RANGE, format!("bytes={size_on_disk}-"));
+            req = req.header(RANGE, format!("bytes={}-", size_on_disk));
         }
 
         // Add extra headers if needed.

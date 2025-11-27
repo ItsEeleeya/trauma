@@ -7,6 +7,16 @@ pub mod downloader;
 use std::io;
 use thiserror::Error;
 
+#[derive(Error, Debug)]
+pub enum InvalidUrlError {
+    #[error("The url does not contain a valid path: {0}")]
+    InvalidPath(String),
+    #[error("The url does not contain a filename: {0}")]
+    NoFileName(String),
+    #[error("Url Error")]
+    ParseError(#[from] url::ParseError),
+}
+
 /// Errors that can happen when using Trauma.
 #[derive(Error, Debug)]
 pub enum Error {
@@ -14,8 +24,8 @@ pub enum Error {
     #[error("Internal error: {0}")]
     Internal(String),
     /// Error from the underlying URL parser or the expected URL format.
-    #[error("Invalid URL: {0}")]
-    InvalidUrl(String),
+    #[error("Invalid URL")]
+    InvalidUrl(#[from] InvalidUrlError),
     /// I/O Error.
     #[error("I/O error")]
     IOError {
@@ -24,8 +34,5 @@ pub enum Error {
     },
     /// Error from the Reqwest library.
     #[error("Reqwest Error")]
-    Reqwest {
-        #[from]
-        source: reqwest::Error,
-    },
+    Reqwest(#[from] reqwest::Error),
 }
